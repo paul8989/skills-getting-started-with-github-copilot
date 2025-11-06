@@ -13,6 +13,15 @@ document.addEventListener("DOMContentLoaded", () => {
       // Clear loading message
       activitiesList.innerHTML = "";
 
+      // helper to produce initials from a participant string (email or name)
+      function initialsFor(participant) {
+        const local = (participant || "").split("@")[0] || "";
+        const parts = local.split(/[\.\-_ ]+/).filter(Boolean);
+        if (parts.length === 0) return (local.slice(0, 2) || participant.slice(0, 2)).toUpperCase();
+        if (parts.length === 1) return (parts[0].slice(0, 2)).toUpperCase();
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      }
+
       // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
         const activityCard = document.createElement("div");
@@ -26,6 +35,40 @@ document.addEventListener("DOMContentLoaded", () => {
           <p><strong>Schedule:</strong> ${details.schedule}</p>
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
         `;
+
+        // Participants section
+        const participantsHeading = document.createElement("h5");
+        participantsHeading.className = "participants-heading";
+        participantsHeading.textContent = "Participants";
+
+        if (details.participants && details.participants.length) {
+          const ul = document.createElement("ul");
+          ul.className = "participants-list";
+
+          details.participants.forEach((p) => {
+            const li = document.createElement("li");
+
+            const avatar = document.createElement("span");
+            avatar.className = "avatar";
+            avatar.textContent = initialsFor(p);
+
+            const text = document.createElement("span");
+            text.textContent = p;
+
+            li.appendChild(avatar);
+            li.appendChild(text);
+            ul.appendChild(li);
+          });
+
+          activityCard.appendChild(participantsHeading);
+          activityCard.appendChild(ul);
+        } else {
+          const no = document.createElement("p");
+          no.className = "info";
+          no.textContent = "No participants yet";
+          activityCard.appendChild(participantsHeading);
+          activityCard.appendChild(no);
+        }
 
         activitiesList.appendChild(activityCard);
 
